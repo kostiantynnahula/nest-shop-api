@@ -21,7 +21,7 @@ model User {
 
   picture String? @default("https://cdn.iconscout.com/icon/free/png-256/avatar-380-456332.png")
 
-  store     Store[]
+  stores    Store[]
   favorites Product[]
   reviews   Review[]
   orders    Order[]
