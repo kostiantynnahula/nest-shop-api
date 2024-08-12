@@ -1,0 +1,175 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String  @id @default(cuid())
+  email    String  @unique
+  name     String? @default("Not set")
+  password String?
+
+  picture String? @default("https://cdn.iconscout.com/icon/free/png-256/avatar-380-456332.png")
+
+  store     Store[]
+  favorites Product[]
+  reviews   Review[]
+  orders    Order[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("user")
+}
+
+model Store {
+  id          String  @id @default(cuid())
+  title       String
+  description String?
+
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String? @map("user_id")
+
+  products   Product[]
+  categories Category[]
+  colors     Color[]
+  reviews    Review[]
+  orderItems OrderItem[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("store")
+}
+
+model Product {
+  id          String @id @default(cuid())
+  title       String
+  description String
+
+  price  Int
+  images String[]
+
+  orderItems OrderItem[]
+
+  reviews Review[]
+
+  store   Store?  @relation(fields: [storeId], references: [id])
+  storeId String? @map("store_id")
+
+  category   Category? @relation(fields: [categoryId], references: [id])
+  categoryId String?   @map("category_id")
+
+  color   Color?  @relation(fields: [colorId], references: [id])
+  colorId String? @map("color_id")
+
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String? @map("user_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("product")
+}
+
+model Category {
+  id          String @id @default(cuid())
+  title       String
+  description String
+
+  products Product[]
+
+  store   Store?  @relation(fields: [storeId], references: [id])
+  storeId String? @map("store_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("category")
+}
+
+model Color {
+  id    String @id @default(cuid())
+  name  String
+  value String
+
+  products Product[]
+
+  store   Store?  @relation(fields: [storeId], references: [id])
+  storeId String? @map("store_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("color")
+}
+
+model Review {
+  id     String @id @default(cuid())
+  text   String
+  rating Int
+
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String? @map("user_id")
+
+  product   Product? @relation(fields: [productId], references: [id])
+  productId String?  @map("product_id")
+
+  store   Store?  @relation(fields: [storeId], references: [id])
+  storeId String? @map("store_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("review")
+}
+
+model Order {
+  id String @id @default(cuid())
+
+  status EnumOrderStatus @default(PENDING)
+
+  items OrderItem[]
+  total Int
+
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String? @map("user_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("order")
+}
+
+model OrderItem {
+  id String @id @default(cuid())
+
+  qunatity Int
+  price    Int
+
+  order   Order?  @relation(fields: [orderId], references: [id])
+  orderId String? @map("order_id")
+
+  product   Product? @relation(fields: [productId], references: [id])
+  productId String?  @map("product_id")
+
+  store   Store?  @relation(fields: [storeId], references: [id])
+  storeId String? @map("store_id")
+
+  @@map("order_item")
+}
+
+enum EnumOrderStatus {
+  PENDING
+  PAID
+}
