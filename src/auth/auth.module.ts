@@ -9,6 +9,7 @@ import { PrismaService } from 'src/utils/services/prisma.service';
 import { UserService } from 'src/user/user.service';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { ResponseTokenService } from './response-token.service';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     UserService,
     JwtStrategy,
     GoogleStrategy,
+    ResponseTokenService,
   ],
 })
 export class AuthModule {}

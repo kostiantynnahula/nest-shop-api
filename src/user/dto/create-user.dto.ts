@@ -3,7 +3,9 @@ import {
   IsOptional,
   IsString,
   IsStrongPassword,
+  Validate,
 } from 'class-validator';
+import { UniqueEmailValidator } from 'src/utils/validators/unique-email.validator';
 
 export class CreateUserDto {
   @IsOptional()
@@ -12,8 +14,13 @@ export class CreateUserDto {
 
   @IsString()
   @IsEmail()
+  @Validate(UniqueEmailValidator)
   email: string;
 
   @IsStrongPassword()
-  password: string;
+  password?: string;
+
+  @IsOptional()
+  @IsString()
+  picture?: string;
 }

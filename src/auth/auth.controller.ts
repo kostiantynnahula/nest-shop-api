@@ -14,10 +14,16 @@ import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { Response, Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
+import { ResponseTokenService } from './response-token.service';
+import { REFRESH_TOKEN_NAME } from './constants/token';
+import { GoogleCallbackResponse } from './interfaces/google.interface';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly responseTokenService: ResponseTokenService,
+  ) {}
 
   @HttpCode(200)
   @Post('login')
@@ -26,7 +32,9 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { refreshToken, ...response } = await this.authService.login(body);
-    this.authService.addRefreshTokenToResponse(res, refreshToken);
+
+    this.responseTokenService.addRefreshTokenToResponse(res, refreshToken);
+
     return response;
   }
 
@@ -36,7 +44,9 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { refreshToken, ...response } = await this.authService.register(body);
-    this.authService.addRefreshTokenToResponse(res, refreshToken);
+
+    this.responseTokenService.addRefreshTokenToResponse(res, refreshToken);
+
     return response;
   }
 
@@ -45,40 +55,42 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const refreshTokenFromCookies =
-      req.cookies[this.authService.REFRESH_TOKEN_NAME];
+    const refreshTokenFromCookies = req.cookies[REFRESH_TOKEN_NAME];
 
     if (!refreshTokenFromCookies) {
-      this.authService.removeRefreshTokenFromResponse(res);
+      this.responseTokenService.removeRefreshTokenFromResponse(res);
       throw new UnauthorizedException('Refresh token is missing');
     }
 
-    const { refreshToken, ...response } = await this.authService.getNewTokens(
+    const { refreshToken, ...response } = await this.authService.refreshTokens(
       refreshTokenFromCookies,
     );
 
-    this.authService.addRefreshTokenToResponse(res, refreshToken);
+    this.responseTokenService.addRefreshTokenToResponse(res, refreshToken);
 
     return response;
   }
 
   @Post('logout')
   async logout(@Res({ passthrough: true }) res: Response) {
-    this.authService.removeRefreshTokenFromResponse(res);
+    this.responseTokenService.removeRefreshTokenFromResponse(res);
     return { message: 'Logged out' };
   }
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  async googleAuth(@Req() _req: any) {}
+  async googleAuth(@Req() req: any) {}
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  async googleAuthCallback(@Req() req: any, @Res() res: Response) {
+  async googleAuthCallback(
+    @Req() req: GoogleCallbackResponse,
+    @Res() res: Response,
+  ) {
     const { refreshToken, ...response } =
-      await this.authService.validateOAuthLogin(req);
+      await this.authService.validateOAuthLogin(req.user);
 
-    this.authService.addRefreshTokenToResponse(res, refreshToken);
+    this.responseTokenService.addRefreshTokenToResponse(res, refreshToken);
 
     res.redirect(
       `${process.env.CLIENT_URL}/dashboard?accessToken=${response.accessToken}`,

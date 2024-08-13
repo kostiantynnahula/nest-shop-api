@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/utils/services/prisma.service';
 import { User } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { hash } from 'argon2';
+import { GoogleCallbackUserResponse } from 'src/auth/interfaces/google.interface';
 
 @Injectable()
 export class UserService {
@@ -28,6 +29,30 @@ export class UserService {
         orders: true,
       },
     });
+  }
+
+  async getByEmailOrThrow(email: string): Promise<User> {
+    const user = await this.getByEmail(email);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
+  async getOrCreate(data: GoogleCallbackUserResponse): Promise<User> {
+    const user = await this.getByEmail(data.email);
+
+    if (!user) {
+      return this.create({
+        email: data.email,
+        name: data.name,
+        picture: data.picture,
+      });
+    }
+
+    return user;
   }
 
   async create(data: CreateUserDto): Promise<User> {
