@@ -9,7 +9,7 @@ import { GoogleCallbackUserResponse } from 'src/auth/interfaces/google.interface
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getById(id: string): Promise<User> {
+  async getById(id: string) {
     return this.prisma.user.findUnique({
       where: { id },
       include: {
@@ -58,5 +58,22 @@ export class UserService {
   async create(data: CreateUserDto): Promise<User> {
     const password = await hash(data.password);
     return this.prisma.user.create({ data: { ...data, password } });
+  }
+
+  async toggleFavorite(productId: string, userId: string) {
+    const user = await this.getById(userId);
+
+    const isFavorite = user.favorites.some(
+      (product) => product.id === productId,
+    );
+
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        favorites: {
+          [isFavorite ? 'disconnect' : 'connect']: { id: productId },
+        },
+      },
+    });
   }
 }
