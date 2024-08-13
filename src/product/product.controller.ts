@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ProductService } from './product.service';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { ProductDto } from './dto/product.dto';
@@ -9,7 +18,7 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Get()
-  async getAll(@Query() searchTerm?: string) {
+  async getAll(@Query('searchTerm') searchTerm?: string) {
     return this.productService.getAll(searchTerm);
   }
 

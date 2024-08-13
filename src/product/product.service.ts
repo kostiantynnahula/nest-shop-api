@@ -6,11 +6,12 @@ import { ProductDto } from './dto/product.dto';
 export class ProductService {
   constructor(private prisma: PrismaService) {}
 
-  async getAll(userId: string) {
+  async getAll(searchTerm?: string) {
+    if (searchTerm) {
+      return await this.getSearchTermFilter(searchTerm);
+    }
+
     return await this.prisma.product.findMany({
-      where: {
-        userId,
-      },
       orderBy: {
         createdAt: 'desc',
       },
@@ -20,23 +21,25 @@ export class ProductService {
     });
   }
 
-  private getSearchTermFilter(searchTerm: string) {
-    return {
-      OR: [
-        {
-          name: {
-            contains: searchTerm,
-            mode: 'insensitive',
+  private async getSearchTermFilter(searchTerm: string) {
+    return await this.prisma.product.findMany({
+      where: {
+        OR: [
+          {
+            title: {
+              contains: searchTerm,
+              mode: 'insensitive',
+            },
           },
-        },
-        {
-          description: {
-            contains: searchTerm,
-            mode: 'insensitive',
+          {
+            description: {
+              contains: searchTerm,
+              mode: 'insensitive',
+            },
           },
-        },
-      ],
-    };
+        ],
+      },
+    });
   }
 
   async getByStoreId(storeId: string) {

@@ -24,7 +24,7 @@ export class ProductDto {
   @IsArray()
   @ArrayNotEmpty()
   @IsNotEmpty({ each: true })
-  pictures: string[];
+  images: string[];
 
   @IsDefined()
   @IsString()
