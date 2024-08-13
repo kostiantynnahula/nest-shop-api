@@ -61,7 +61,7 @@ export class AuthService {
     return { ...user, ...tokens };
   }
 
-  async register(data: CreateUserDto) {
+  async register(data: CreateUserDto): Promise<User & IssueTokenResponse> {
     // TODO: Implement validateion on the dto level
     const oldUser = await this.userService.getByEmail(data.email);
 
@@ -122,7 +122,7 @@ export class AuthService {
       httpOnly: true,
       domain: this.configService.get('SERVER_DOMAIN'),
       expires: expiresIn,
-      secure: true,
+      // secure: true,
       sameSite: 'none',
     });
   }
@@ -136,7 +136,7 @@ export class AuthService {
       httpOnly: true,
       domain: this.configService.get('SERVER_DOMAIN'),
       expires: new Date(0),
-      secure: true,
+      // secure: true,
       sameSite: 'none',
     });
   }

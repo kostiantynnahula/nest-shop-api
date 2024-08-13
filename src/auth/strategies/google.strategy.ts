@@ -9,7 +9,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private configService: ConfigService) {
     super({
       clientID: configService.get('GOOGLE_CLIENT_ID'),
-      cluentSecret: configService.get('GOOGLE_CLIENT_SECRET'),
+      clientSecret: configService.get('GOOGLE_CLIENT_SECRET'),
       callbackURL: `${configService.get('SERVER_URL')}/auth/google/callback`,
       scope: ['profile', 'email'],
     });
@@ -20,7 +20,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     _refreshToken: string,
     profile: Profile,
     done: VerifiedCallback,
-  ) {
+  ): Promise<void> {
     const { displayName, emails, photos } = profile;
 
     const user = {
