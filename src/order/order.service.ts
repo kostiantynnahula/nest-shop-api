@@ -46,4 +46,14 @@ export class OrderService {
 
     return { payment };
   }
+
+  async updateStatus(data: any) {
+    // TODO: Implement the process of updating the status of an order
+    // 1. check order event type
+    // 2. parse order metadata
+    // 3. get order id
+    // 4. update order status
+
+    return true;
+  }
 }

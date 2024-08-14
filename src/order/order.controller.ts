@@ -13,4 +13,9 @@ export class OrderController {
   async checkout(@Body() dto: OrderDto, @CurrentUser('id') userId: string) {
     return await this.orderService.createPayment(dto, userId);
   }
+
+  @Post('status')
+  async updateStatus(@Body() dto: any) {
+    return await this.orderService.updateStatus(dto);
+  }
 }
