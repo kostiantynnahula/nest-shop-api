@@ -10,7 +10,7 @@ import { Auth } from 'src/auth/decorators/auth.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Auth()
-@Controller('file')
+@Controller('files')
 export class FileController {
   constructor(private readonly fileService: FileService) {}
 

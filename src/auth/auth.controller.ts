@@ -50,7 +50,7 @@ export class AuthController {
     return response;
   }
 
-  @Post('refresh-token')
+  @Post('refresh')
   async refresh(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
